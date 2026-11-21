@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTA Generation – Then & Now</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:#fff; background:#000; min-height:100vh; }
+    .bg-media { position:fixed; inset:0; background: radial-gradient(ellipse at top,#1f1133 0%,#050507 45%,#000 100%) center/cover no-repeat; z-index:-2; transition: background-image .3s ease; }
+    .bg-overlay { position:fixed; inset:0; background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55) 55%, rgba(0,0,0,.8)); z-index:-1; }
+    .hero-logos img { max-height:110px; width:100%; object-fit:contain; }
+    .media-rail { display:flex; gap:8px; overflow-x:auto; padding:10px 0 2px; }
+    .media-thumb { flex:0 0 auto; width:110px; height:70px; border-radius:8px; overflow:hidden; border:2px solid transparent; background:#000; position:relative; }
+    .media-thumb.active { border-color:#e879f9; }
+    .media-thumb img { width:100%; height:100%; object-fit:cover; }
+    .media-thumb span { position:absolute; bottom:2px; left:4px; font-size:10px; text-shadow:0 1px 3px #000; }
+    .v-badge { font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif; font-size:2rem; color:#fff; text-shadow:0 0 14px rgba(244,114,182,.8); }
+    .bg-grid { background-image: linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); background-size:40px 40px; min-height:100vh; }
+    .wrap { max-width:1100px; margin:0 auto; padding:16px; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:8px 0 16px; }
+    .brand { font-weight:900; letter-spacing:.18em; color:rgba(255,255,255,.8); font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; }
+    .btn, button { cursor:pointer; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; border-radius:999px; padding:8px 14px; font:inherit; }
+    button:hover { background:rgba(255,255,255,.12); }
+    .card { border:1px solid rgba(255,255,255,.1); background:rgba(0,0,0,.4); border-radius:24px; padding:28px; box-shadow:0 0 30px rgba(167,139,250,.25); }
+    .logos { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .logo-slot { width:160px; height:64px; display:flex; align-items:center; justify-content:center; border:1px solid; border-radius:14px; font-size:12px; font-weight:800; letter-spacing:.12em; background:rgba(255,255,255,.04); }
+    .v { color:#4fd1c5; border-color:#4fd1c5; } .vi { color:#f472b6; border-color:#f472b6; }
+    h1 { font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size: clamp(2rem, 5vw, 3.6rem); text-align:center; margin:28px 0 8px; line-height:1.05; text-shadow:0 2px 0 rgba(0,0,0,.7),0 0 18px rgba(167,139,250,.35); }
+    .sub { text-align:center; color:rgba(255,255,255,.75); font-size:1.1rem; margin:0 auto 24px; max-width:700px; }
+    .center { display:flex; justify-content:center; }
+    .cta { border:0; color:#111; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size:1.25rem; letter-spacing:.04em; padding:14px 28px; background:linear-gradient(90deg,#2dd4bf,#d946ef,#fb923c); box-shadow:0 0 30px rgba(167,139,250,.35); }
+    .cta:disabled { opacity:.5; cursor:not-allowed; }
+    .muted { color:rgba(255,255,255,.55); font-size:.8rem; text-align:center; margin-top:14px; }
+    .grid2 { display:grid; grid-template-columns:1fr; gap:16px; }
+    @media (min-width: 800px){ .grid2 { grid-template-columns:1fr 1fr; } }
+    .slot { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); border-radius:18px; padding:14px; }
+    .slot h3 { margin:0; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; font-size:1.3rem; letter-spacing:.03em; }
+    .slot p { margin:4px 0 0; color:rgba(255,255,255,.7); font-size:.9rem; }
+    .drop { margin-top:12px; min-height:260px; border:1px dashed rgba(255,255,255,.25); border-radius:14px; background:rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+    .drop img { width:100%; height:260px; object-fit:cover; display:block; }
+    .drop .hint { text-align:center; color:rgba(255,255,255,.7); padding:20px; }
+    .row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .small { border-radius:10px; padding:8px 10px; font-size:.9rem; }
+    .danger { background:rgba(239,68,68,.2); color:#fecaca; border-color:rgba(239,68,68,.3); }
+    .hidden { display:none !important; }
+    .warn { color:#fcd34d; text-align:center; font-size:.9rem; }
+    .result-grid { display:grid; grid-template-columns:1fr; gap:16px; }
+    @media (min-width: 900px){ .result-grid { grid-template-columns:1.2fr 1fr; } }
+    .panel { border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.05); border-radius:18px; padding:14px; }
+    .preview-img { width:100%; max-height:70vh; object-fit:contain; border-radius:10px; background:#000; }
+    .stack { display:flex; flex-direction:column; gap:8px; }
+    .full { width:100%; border-radius:10px; padding:12px; font-weight:600; }
+    .white { background:#fff; color:#111; border:0; }
+    .pink { background:#c026d3; border:0; }
+    .fmt { text-align:left; border-radius:10px; }
+    .fmt.active { border-color:#e879f9; background:rgba(217,70,239,.2); }
+    /* Crop modal */
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; padding:16px; z-index:50; }
+    .modal-card { width:min(760px,100%); background:#09090b; border:1px solid rgba(255,255,255,.1); border-radius:18px; padding:14px; }
+    .crop-area { position:relative; height:52vh; background:#000; border-radius:12px; overflow:hidden; touch-action:none; }
+    .crop-area img { position:absolute; top:50%; left:50%; transform-origin:center center; user-select:none; -webkit-user-drag:none; max-width:none; }
+    .crop-frame { position:absolute; inset:50% auto auto 50%; width:min(70%, 360px); aspect-ratio:3/4; transform:translate(-50%,-50%); border:2px solid rgba(255,255,255,.9); box-shadow:0 0 0 9999px rgba(0,0,0,.45); pointer-events:none; border-radius:6px; }
+    label { font-size:.9rem; color:rgba(255,255,255,.8); }
+    input[type=range]{ width:100%; }
+  </style>
+</head>
+<body>
+<div class="bg-media" id="bgMedia"></div>
+<div class="bg-overlay" id="bgOverlay"></div>
+<div class="bg-grid">
+  <div class="wrap">
+    <header>
+      <div class="brand">GTA GENERATION</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="bgInput" type="file" accept="image/*" class="hidden" />
+        <button id="bgBtn" title="Background">Background</button>
+        <button id="langBtn" title="Language">EN</button>
+      </div>
+    </header>
+
+    <main id="home" class="card">
+      <div class="logos hero-logos">
+        <div class="logo-slot v" style="border:none;background:transparent">
+          <img id="logoV" alt="Grand Theft Auto V logo" />
+          <span class="v-badge">V</span>
+        </div>
+        <div style="font-weight:900;color:rgba(255,255,255,.4);font-size:1.6rem">VS</div>
+        <div class="logo-slot vi" style="border:none;background:transparent">
+          <img id="logoVI" alt="Grand Theft Auto VI logo" />
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:.75rem;color:rgba(255,255,255,.6);letter-spacing:.1em;text-transform:uppercase" id="mediaLabel">Official artwork / Visuels officiels</div>
+        <div class="media-rail" id="mediaRail"></div>
+      </div>
+      <h1 id="heroTitle">GTA 5 vs GTA 6 – How Much Have You Changed?</h1>
+      <p class="sub" id="heroSubtitle">Two GTA generations. One life. Your story.</p>
+      <div class="center"><button id="goUpload" class="cta">CREATE MY COMPARISON</button></div>
+      <p class="muted" id="privacy1">Photos are processed locally in your browser when possible. Nothing is stored permanently.</p>
+    </main>
+
+    <main id="upload" class="hidden">
+      <h2 id="uploadTitle" style="font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;font-size:2rem;margin:0 0 14px">Upload your photos</h2>
+      <div class="grid2">
+        <section class="slot">
+          <h3 id="t2013">Photo 1 – GTA 5 (2013)</h3>
+          <p id="h2013">A personal photo from 2013 or around that time.</p>
+          <div class="drop" id="dropLeft"><div class="hint" id="hintLeft">Click or drop an image (JPG, PNG, WEBP)</div></div>
+          <input id="fileLeft" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="hidden" />
+          <div class="row hidden" id="actionsLeft">
+            <button class="small" id="replaceLeft">Replace</button>
+            <button class="small" id="cropLeft">Crop</button>
+            <button class="small danger" id="removeLeft">Remove</button>
+          </div>
+        </section>
+        <section class="slot">
+          <h3 id="t2026">Photo 2 – GTA 6 (2026)</h3>
+          <p id="h2026">A recent photo from the GTA 6 era.</p>
+          <div class="drop" id="dropRight"><div class="hint" id="hintRight">Click or drop an image (JPG, PNG, WEBP)</div></div>
+          <input id="fileRight" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="hidden" />
+          <div class="row hidden" id="actionsRight">
+            <button class="small" id="replaceRight">Replace</button>
+            <button class="small" id="cropRight">Crop</button>
+            <button class="small danger" id="removeRight">Remove</button>
+          </div>
+        </section>
+      </div>
+      <div class="center" style="margin-top:18px;flex-direction:column;align-items:center;gap:8px">
+        <p class="warn hidden" id="needBoth">Please add both photos to continue.</p>
+        <button id="generate" class="cta" disabled>GENERATE MY GTA GENERATION</button>
+        <p class="muted" id="privacy2">Photos are processed locally in your browser when possible. Nothing is stored permanently.</p>
+      </div>
+    </main>
+
+    <main id="result" class="hidden">
+      <h2 id="resultTitle" style="font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;font-size:2rem;margin:0 0 14px">Your GTA generation</h2>
+      <div class="result-grid">
+        <div class="panel"><img id="preview" class="preview-img" alt="Result" /></div>
+        <div class="stack">
+          <div class="panel stack">
+            <div style="color:rgba(255,255,255,.7);font-size:.9rem" id="formatLabel">Format</div>
+            <button class="fmt full active" data-fmt="square" id="fmtSquare">Square 1080×1080 (Instagram)</button>
+            <button class="fmt full" data-fmt="portrait" id="fmtPortrait">Portrait 1080×1350 (Instagram)</button>
+            <button class="fmt full" data-fmt="story" id="fmtStory">Story 1080×1920 (TikTok/Stories)</button>
+          </div>
+          <div class="panel stack">
+            <button id="dlPng" class="full white">Download PNG</button>
+            <button id="dlJpg" class="full">Download JPEG</button>
+            <button id="shareBtn" class="full pink">Share</button>
+            <button id="restart" class="full">Start over</button>
+          </div>
+          <p class="muted" id="privacy3" style="margin:0">Photos are processed locally in your browser when possible. Nothing is stored permanently.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="cropModal" class="modal hidden">
+  <div class="modal-card">
+    <h3 id="cropTitle" style="margin:0 0 10px;font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;font-size:1.6rem">Adjust your photo</h3>
+    <div class="crop-area" id="cropArea">
+      <img id="cropImg" alt="crop" />
+      <div class="crop-frame"></div>
+    </div>
+    <div style="margin-top:10px">
+      <label for="zoom" id="zoomLabel">Zoom</label>
+      <input id="zoom" type="range" min="1" max="3" step="0.01" value="1" />
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px">
+      <button id="cropCancel">Cancel</button>
+      <button id="cropSave" class="pink" style="border:0">Save crop</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const T = {
+    en: {
+      heroTitle: 'GTA 5 vs GTA 6 – How Much Have You Changed?',
+      heroSubtitle: 'Two GTA generations. One life. Your story.',
+      cta: 'CREATE MY COMPARISON', upload: 'Upload your photos',
+      p2013: 'Photo 1 – GTA 5 (2013)', p2026: 'Photo 2 – GTA 6 (2026)',
+      h2013: 'A personal photo from 2013 or around that time.',
+      h2026: 'A recent photo from the GTA 6 era.',
+      drop: 'Click or drop an image (JPG, PNG, WEBP)',
+      replace: 'Replace', remove: 'Remove', crop: 'Crop', cropTitle: 'Adjust your photo', saveCrop: 'Save crop', cancel: 'Cancel', zoom: 'Zoom',
+      generate: 'GENERATE MY GTA GENERATION', generating: 'Generating…', needBoth: 'Please add both photos to continue.',
+      result: 'Your GTA generation', download: 'Download', share: 'Share', restart: 'Start over',
+      fmt: 'Format', square: 'Square 1080×1080 (Instagram)', portrait: 'Portrait 1080×1350 (Instagram)', story: 'Story 1080×1920 (TikTok/Stories)',
+      privacy: 'Photos are processed locally in your browser when possible. Nothing is stored permanently.',
+      yearsLater: '13 YEARS LATER...', samePlayer: 'Same Player. Different Generation.',
+      bg: 'Background', bgTitle: 'Set background image (use your own authorized image, e.g. GTA VI poster)',
+      media: 'Official artwork / Key art'
+    },
+    fr: {
+      heroTitle: 'GTA 5 vs GTA 6 – À quel point avez-vous changé ?',
+      heroSubtitle: 'Deux générations de GTA. Une vie. Votre histoire.',
+      cta: 'CRÉER MA COMPARAISON', upload: 'Téléchargez vos photos',
+      p2013: 'Photo 1 – GTA 5 (2013)', p2026: 'Photo 2 – GTA 6 (2026)',
+      h2013: 'Photo personnelle prise en 2013 ou autour de cette période.',
+      h2026: 'Photo récente de l’époque GTA 6.',
+      drop: 'Cliquez ou déposez une image (JPG, PNG, WEBP)',
+      replace: 'Remplacer', remove: 'Supprimer', crop: 'Recadrer', cropTitle: 'Ajustez votre photo', saveCrop: 'Enregistrer', cancel: 'Annuler', zoom: 'Zoom',
+      generate: 'GÉNÉRER MA GÉNÉRATION GTA', generating: 'Génération…', needBoth: 'Veuillez ajouter les deux photos pour continuer.',
+      result: 'Votre génération GTA', download: 'Télécharger', share: 'Partager', restart: 'Recommencer',
+      fmt: 'Format', square: 'Carré 1080×1080 (Instagram)', portrait: 'Portrait 1080×1350 (Instagram)', story: 'Story 1080×1920 (TikTok/Stories)',
+      privacy: 'Les photos sont traitées localement dans votre navigateur lorsque possible. Aucune conservation permanente.',
+      yearsLater: '13 ANS PLUS TARD...', samePlayer: 'Même joueur. Nouvelle génération.',
+      bg: 'Arrière-plan', bgTitle: 'Définir l’image d’arrière-plan (utilisez votre propre image autorisée, ex. affiche GTA VI)',
+      media: 'Visuels officiels / Affiche'
+    }
+  };
+  const R = 'https://www.rockstargames.com/VI/_next/static/media/';
+  const ASSETS = {
+    poster: R + 'poster_full.02ig6s_80ei58.jpg',
+    intro: R + 'intro.081gaz4~3wox-.png',
+    scene1: R + 'an-extended-look.0ijbsha5fo1te.jpg',
+    scene2: R + 'launch-trailer.0.fbrrtu5j-9_.jpg',
+    scene3: R + 'onlyInLeonidaDesktop.15y2n40f3axwo.jpg',
+    scene4: R + 'desktop.00.5pzu2sm-z4.jpg',
+    logoGta: R + 'logo_gta.0_~y3s2ni8fbj.png',
+    logoVi: R + 'logo_vi.02gnpy7k4ozcz.png',
+    // CORS-enabled copy of the official GTA VI intro art so it can be drawn on the export canvas
+    introProxy: 'https://images.weserv.nl/?url=www.rockstargames.com%2FVI%2F_next%2Fstatic%2Fmedia%2Fintro.081gaz4~3wox-.png&w=1400'
+  };
+  const BG_ITEMS = [
+    {id:'poster', label:'GTA VI Poster', src:ASSETS.poster},
+    {id:'intro', label:'Vice City Intro', src:ASSETS.intro},
+    {id:'scene1', label:'Extended Look', src:ASSETS.scene1},
+    {id:'scene2', label:'Launch Trailer', src:ASSETS.scene2},
+    {id:'scene3', label:'Only in Leonida', src:ASSETS.scene3},
+    {id:'scene4', label:'Leonida', src:ASSETS.scene4}
+  ];
+  const FORMATS = { square:[1080,1080], portrait:[1080,1350], story:[1080,1920] };
+  let lang = 'en';
+  let left = null, right = null; // {src, cropped}
+  let results = null, selected = 'square';
+  let cropSide = null, cropState = {x:0,y:0,zoom:1,dragging:false,sx:0,sy:0,ox:0,oy:0,imgW:0,imgH:0,boxW:0,boxH:0};
+
+  const $ = (id)=>document.getElementById(id);
+  function t(){ return T[lang]; }
+  function show(id){ ['home','upload','result'].forEach(s=>$(s).classList.toggle('hidden', s!==id)); }
+
+  function applyLang(){
+    const tr=t();
+    $('langBtn').textContent = lang.toUpperCase();
+    $('bgBtn').textContent = tr.bg; $('bgBtn').title = tr.bgTitle;
+    $('mediaLabel').textContent = tr.media;
+    $('heroTitle').textContent = tr.heroTitle; $('heroSubtitle').textContent = tr.heroSubtitle;
+    $('goUpload').textContent = tr.cta; $('uploadTitle').textContent = tr.upload; $('resultTitle').textContent = tr.result;
+    $('t2013').textContent = tr.p2013; $('t2026').textContent = tr.p2026; $('h2013').textContent = tr.h2013; $('h2026').textContent = tr.h2026;
+    $('hintLeft').textContent = tr.drop; $('hintRight').textContent = tr.drop;
+    $('replaceLeft').textContent = tr.replace; $('replaceRight').textContent = tr.replace;
+    $('removeLeft').textContent = tr.remove; $('removeRight').textContent = tr.remove;
+    $('cropLeft').textContent = tr.crop; $('cropRight').textContent = tr.crop;
+    $('needBoth').textContent = tr.needBoth; $('generate').textContent = tr.generatingText && $('generate').disabled ? tr.generating : tr.generate;
+    $('formatLabel').textContent = tr.fmt;
+    $('fmtSquare').textContent = tr.square; $('fmtPortrait').textContent = tr.portrait; $('fmtStory').textContent = tr.story;
+    $('dlPng').textContent = tr.download + ' PNG'; $('dlJpg').textContent = tr.download + ' JPEG';
+    $('shareBtn').textContent = tr.share; $('restart').textContent = tr.restart;
+    $('privacy1').textContent = tr.privacy; $('privacy2').textContent = tr.privacy; $('privacy3').textContent = tr.privacy;
+    $('cropTitle').textContent = tr.cropTitle; $('cropSave').textContent = tr.saveCrop; $('cropCancel').textContent = tr.cancel; $('zoomLabel').textContent = tr.zoom;
+  }
+
+  function readFile(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+  function valid(file){ return file && /image\/(jpeg|jpg|png|webp)/i.test(file.type); }
+
+  function setBackground(src, id){
+    $('bgMedia').style.backgroundImage = `linear-gradient(rgba(0,0,0,.15),rgba(0,0,0,.15)), url("${src}")`;
+    $('bgMedia').style.backgroundSize = 'cover';
+    $('bgMedia').style.backgroundPosition = 'center top';
+    document.querySelectorAll('.media-thumb').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
+  }
+  function initMedia(){
+    $('logoV').src = ASSETS.logoGta;
+    $('logoVI').src = ASSETS.logoVi;
+    const rail = $('mediaRail');
+    rail.innerHTML = '';
+    BG_ITEMS.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='media-thumb'+(item.id==='poster'?' active':'');
+      d.dataset.id=item.id;
+      d.innerHTML=`<img src="${item.src}" alt="${item.label}"><span>${item.label}</span>`;
+      d.addEventListener('click', ()=>setBackground(item.src, item.id));
+      rail.appendChild(d);
+    });
+    setBackground(BG_ITEMS[0].src, BG_ITEMS[0].id);
+  }
+
+  function renderSlot(side){
+    const photo = side==='left'?left:right;
+    const drop = $(side==='left'?'dropLeft':'dropRight');
+    const actions = $(side==='left'?'actionsLeft':'actionsRight');
+    const hint = $(side==='left'?'hintLeft':'hintRight');
+    drop.innerHTML = '';
+    if(photo){
+      const img=document.createElement('img'); img.src = photo.cropped || photo.src; drop.appendChild(img); actions.classList.remove('hidden');
+    } else {
+      const d=document.createElement('div'); d.className='hint'; d.id = side==='left'?'hintLeft':'hintRight'; d.textContent=t().drop; drop.appendChild(d); actions.classList.add('hidden');
+    }
+    updateGenerate();
+  }
+  function updateGenerate(){
+    const ok = !!(left && right);
+    $('generate').disabled = !ok;
+    $('needBoth').classList.toggle('hidden', ok);
+  }
+  async function pick(side, files){
+    const f = files && files[0]; if(!valid(f)) return;
+    const src = await readFile(f);
+    if(side==='left') left={src}; else right={src};
+    renderSlot(side);
+  }
+  function wireSlot(side){
+    const drop=$(side==='left'?'dropLeft':'dropRight'); const input=$(side==='left'?'fileLeft':'fileRight');
+    drop.addEventListener('click', ()=>{ if(!(side==='left'?left:right)) input.click(); });
+    drop.addEventListener('dragover', e=>e.preventDefault());
+    drop.addEventListener('drop', e=>{ e.preventDefault(); pick(side, e.dataTransfer.files); });
+    input.addEventListener('change', e=>pick(side, e.target.files));
+    $(side==='left'?'replaceLeft':'replaceRight').addEventListener('click', ()=>input.click());
+    $(side==='left'?'removeLeft':'removeRight').addEventListener('click', ()=>{ if(side==='left') left=null; else right=null; input.value=''; renderSlot(side); });
+    $(side==='left'?'cropLeft':'cropRight').addEventListener('click', ()=>openCrop(side));
+  }
+
+  // Cropper (simple pan/zoom, fixed 3:4 frame)
+  function openCrop(side){
+    const photo = side==='left'?left:right; if(!photo) return; cropSide=side;
+    const img=$('cropImg'); img.src = photo.src;
+    $('zoom').value = 1; cropState.zoom=1; cropState.x=0; cropState.y=0;
+    $('cropModal').classList.remove('hidden');
+    img.onload = ()=>{ cropState.imgW=img.naturalWidth; cropState.imgH=img.naturalHeight; layoutCrop(); };
+    if(img.complete) { cropState.imgW=img.naturalWidth; cropState.imgH=img.naturalHeight; layoutCrop(); }
+  }
+  function frameRect(){ const area=$('cropArea').getBoundingClientRect(); const fw=Math.min(area.width*0.7,360); const fh=fw*4/3; return {ax:area.width/2, ay:area.height/2, fw, fh}; }
+  function layoutCrop(){
+    const img=$('cropImg'); const {fw,fh}=frameRect();
+    const baseScale = Math.max(fw/cropState.imgW, fh/cropState.imgH);
+    const s = baseScale * cropState.zoom;
+    img.style.width = (cropState.imgW*s)+'px'; img.style.height = (cropState.imgH*s)+'px';
+    img.style.transform = `translate(calc(-50% + ${cropState.x}px), calc(-50% + ${cropState.y}px))`;
+  }
+  function clampPan(){
+    const {fw,fh}=frameRect();
+    const baseScale = Math.max(fw/cropState.imgW, fh/cropState.imgH); const s=baseScale*cropState.zoom;
+    const w=cropState.imgW*s, h=cropState.imgH*s;
+    const maxX = Math.max(0,(w-fw)/2), maxY=Math.max(0,(h-fh)/2);
+    cropState.x = Math.min(maxX, Math.max(-maxX, cropState.x));
+    cropState.y = Math.min(maxY, Math.max(-maxY, cropState.y));
+  }
+  $('zoom').addEventListener('input', e=>{ cropState.zoom=parseFloat(e.target.value); clampPan(); layoutCrop(); });
+  const area=$('cropArea');
+  area.addEventListener('pointerdown', e=>{ cropState.dragging=true; cropState.sx=e.clientX; cropState.sy=e.clientY; cropState.ox=cropState.x; cropState.oy=cropState.y; area.setPointerCapture(e.pointerId); });
+  area.addEventListener('pointermove', e=>{ if(!cropState.dragging) return; cropState.x=cropState.ox+(e.clientX-cropState.sx); cropState.y=cropState.oy+(e.clientY-cropState.sy); clampPan(); layoutCrop(); });
+  area.addEventListener('pointerup', ()=>cropState.dragging=false); area.addEventListener('pointercancel', ()=>cropState.dragging=false);
+  $('cropCancel').addEventListener('click', ()=>{ $('cropModal').classList.add('hidden'); cropSide=null; });
+  $('cropSave').addEventListener('click', async ()=>{
+    const photo=cropSide==='left'?left:right; if(!photo) return;
+    const {fw,fh}=frameRect();
+    const baseScale = Math.max(fw/cropState.imgW, fh/cropState.imgH); const s=baseScale*cropState.zoom;
+    const dispW=cropState.imgW*s, dispH=cropState.imgH*s;
+    const imgCenterX = (area.clientWidth/2 + cropState.x), imgCenterY=(area.clientHeight/2 + cropState.y);
+    const imgLeft = imgCenterX - dispW/2, imgTop = imgCenterY - dispH/2;
+    const frameLeft = (area.clientWidth-fw)/2, frameTop=(area.clientHeight-fh)/2;
+    const sx = (frameLeft - imgLeft)/s, sy=(frameTop - imgTop)/s, sw=fw/s, sh=fh/s;
+    const image = await loadImage(photo.src);
+    const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(sw)); c.height=Math.max(1,Math.round(sh));
+    const ctx=c.getContext('2d'); ctx.drawImage(image, sx, sy, sw, sh, 0,0,c.width,c.height);
+    const data=c.toDataURL('image/jpeg',0.95);
+    if(cropSide==='left') left.cropped=data; else right.cropped=data;
+    $('cropModal').classList.add('hidden'); renderSlot(cropSide); cropSide=null;
+  });
+
+  function loadImage(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+  function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+  function drawCover(ctx,img,x,y,w,h){ const ir=img.width/img.height, r=w/h; let sx,sy,sw,sh; if(ir>r){ sh=img.height; sw=sh*r; sx=(img.width-sw)/2; sy=0; } else { sw=img.width; sh=sw/r; sx=0; sy=(img.height-sh)/2; } ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h); }
+  function drawLogo(ctx,label,x,y,w,h,accent){ ctx.save(); roundRect(ctx,x,y,w,h,18); ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fill(); ctx.strokeStyle=accent; ctx.lineWidth=3; ctx.stroke(); ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font=`700 ${Math.max(22,h*0.28)}px Arial`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label,x+w/2,y+h/2); ctx.restore(); }
+  function loadLogo(src){ return new Promise(res=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
+  const loadCorsImage = loadLogo;
+  function drawLogoImg(ctx,img,x,y,w,h,accent,fallback){ if(img){ ctx.save(); const ar=img.width/img.height, boxAr=w/h; let dw,dh; if(ar>boxAr){dw=w;dh=w/ar;}else{dh=h;dw=h*ar;} ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh); ctx.restore(); } else { drawLogo(ctx,fallback,x,y,w,h,accent); } }
+
+  async function renderComparison(leftSrc,rightSrc,w,h){
+    const [L,R,logoL,logoR,intro]=await Promise.all([loadImage(leftSrc),loadImage(rightSrc),loadLogo(ASSETS.logoGta),loadLogo(ASSETS.logoVi),loadCorsImage(ASSETS.introProxy)]);
+    const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d');
+    const bg=ctx.createLinearGradient(0,0,w,h); bg.addColorStop(0,'#12091d'); bg.addColorStop(.45,'#050507'); bg.addColorStop(1,'#1a1026'); ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+    // Official GTA VI intro artwork as full-bleed background of the exported image
+    if(intro){ ctx.save(); ctx.globalAlpha=.7; drawCover(ctx,intro,0,0,w,h); ctx.restore(); ctx.fillStyle='rgba(5,3,10,.45)'; ctx.fillRect(0,0,w,h); }
+    let g=ctx.createRadialGradient(w*.2,h*.2,10,w*.2,h*.2,w*.5); g.addColorStop(0,'rgba(79,209,197,.18)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    g=ctx.createRadialGradient(w*.8,h*.3,10,w*.8,h*.3,w*.55); g.addColorStop(0,'rgba(244,114,182,.22)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    const pad=Math.round(w*0.06), top=Math.round(h*0.08), bottom=Math.round(h*0.16), gap=Math.round(w*0.04);
+    const areaH=h-top-bottom, panelW=Math.round((w-pad*2-gap)/2), logoH=Math.round(h*0.07), logoW=Math.round(panelW*0.7);
+    const photoY=top+logoH+Math.round(h*0.025), photoH=areaH-logoH-Math.round(h*0.07), photoW=panelW;
+    const leftX=pad, rightX=pad+panelW+gap;
+    drawLogoImg(ctx,logoL, leftX+(panelW-logoW)/2, top, logoW, logoH, '#4fd1c5','GTA V');
+    drawLogoImg(ctx,logoR, rightX+(panelW-logoW)/2, top, logoW, logoH, '#f472b6','GTA VI');
+    [{img:L,x:leftX,accent:'#4fd1c5'},{img:R,x:rightX,accent:'#f472b6'}].forEach(o=>{
+      ctx.save(); roundRect(ctx,o.x,photoY,photoW,photoH,28); ctx.clip(); drawCover(ctx,o.img,o.x,photoY,photoW,photoH);
+      const ov=ctx.createLinearGradient(o.x,photoY,o.x,photoY+photoH); ov.addColorStop(0,'rgba(0,0,0,.05)'); ov.addColorStop(1,'rgba(0,0,0,.35)'); ctx.fillStyle=ov; ctx.fillRect(o.x,photoY,photoW,photoH); ctx.restore();
+      ctx.save(); roundRect(ctx,o.x,photoY,photoW,photoH,28); ctx.strokeStyle=o.accent; ctx.lineWidth=4; ctx.shadowColor=o.accent; ctx.shadowBlur=18; ctx.stroke(); ctx.restore();
+    });
+    ctx.textAlign='center'; ctx.fillStyle='#fff'; ctx.font=`800 ${Math.round(h*0.045)}px Impact, Arial Black, sans-serif`; ctx.shadowColor='rgba(0,0,0,.8)'; ctx.shadowBlur=10;
+    ctx.fillText('2013', leftX+panelW/2, photoY+photoH+Math.round(h*0.045)); ctx.fillText('2026', rightX+panelW/2, photoY+photoH+Math.round(h*0.045)); ctx.shadowBlur=0;
+    const cx=w/2, vy1=top+logoH, vy2=photoY+photoH; const grad=ctx.createLinearGradient(cx,vy1,cx,vy2); grad.addColorStop(0,'rgba(167,139,250,0)'); grad.addColorStop(.5,'rgba(167,139,250,.95)'); grad.addColorStop(1,'rgba(167,139,250,0)');
+    ctx.strokeStyle=grad; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(cx,vy1); ctx.lineTo(cx,vy2); ctx.stroke();
+    ctx.save(); ctx.fillStyle='#0b0712'; ctx.strokeStyle='#e9d5ff'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(cx,(vy1+vy2)/2,Math.round(w*0.045),0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font=`900 ${Math.round(w*0.045)}px Impact, Arial Black, sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('VS',cx,(vy1+vy2)/2+2); ctx.restore();
+    const tr=t(); ctx.textBaseline='alphabetic'; ctx.fillStyle='#fff'; ctx.font=`900 ${Math.round(h*0.05)}px Impact, Arial Black, sans-serif`; ctx.shadowColor='rgba(244,114,182,.5)'; ctx.shadowBlur=16; ctx.fillText(tr.yearsLater,w/2,h-Math.round(h*0.075));
+    ctx.shadowBlur=0; ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font=`600 ${Math.round(h*0.028)}px Arial, sans-serif`; ctx.fillText(tr.samePlayer,w/2,h-Math.round(h*0.035));
+    return c;
+  }
+
+  async function generate(){
+    if(!(left&&right)) return; const tr=t(); $('generate').disabled=true; $('generate').textContent=tr.generating;
+    try {
+      const l=left.cropped||left.src, r=right.cropped||right.src; results={};
+      for(const [k,[w,h]] of Object.entries(FORMATS)){ const c=await renderComparison(l,r,w,h); results[k]=c.toDataURL('image/png'); }
+      selected='square'; updatePreview(); show('result');
+    } finally { $('generate').disabled=!(left&&right); $('generate').textContent=t().generate; }
+  }
+  function updatePreview(){ $('preview').src = results[selected]; document.querySelectorAll('.fmt').forEach(b=>b.classList.toggle('active', b.dataset.fmt===selected)); }
+  function triggerDownload(href, filename){
+    const a=document.createElement('a');
+    a.href = href;
+    a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    if(href.startsWith('blob:')) setTimeout(()=>URL.revokeObjectURL(href), 1000);
+  }
+  function dataUrlToBlob(dataUrl){
+    const parts = dataUrl.split(',');
+    const mime = (parts[0].match(/:(.*?);/) || [,'image/png'])[1];
+    const bin = atob(parts[1]);
+    const len = bin.length;
+    const u8 = new Uint8Array(len);
+    for(let i=0;i<len;i++) u8[i]=bin.charCodeAt(i);
+    return new Blob([u8], {type:mime});
+  }
+  function download(type){
+    if(!results) return;
+    const data = results[selected];
+    const filename = `gta-generation-${selected}.${type==='jpeg'?'jpg':'png'}`;
+    if(type==='jpeg'){
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+        const ctx=c.getContext('2d'); ctx.fillStyle='#000'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0);
+        c.toBlob((blob)=>{
+          if(blob){ triggerDownload(URL.createObjectURL(blob), filename); }
+          else { triggerDownload(c.toDataURL('image/jpeg',0.95), filename); }
+        }, 'image/jpeg', 0.95);
+      };
+      img.src=data; return;
+    }
+    try {
+      const blob = dataUrlToBlob(data);
+      triggerDownload(URL.createObjectURL(blob), filename);
+    } catch(e) {
+      triggerDownload(data, filename);
+    }
+  }
+  async function share(){
+    if(!results) return; const data=results[selected];
+    try { const res=await fetch(data); const blob=await res.blob(); const file=new File([blob],`gta-generation-${selected}.png`,{type:'image/png'});
+      if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) await navigator.share({files:[file],title:'GTA Generation – Then & Now'}); else download('png');
+    } catch(e){ download('png'); }
+  }
+
+  $('langBtn').addEventListener('click', ()=>{ lang = lang==='en'?'fr':'en'; applyLang(); if(results){ /* texts baked in image; regen if desired */ } });
+  $('bgBtn').addEventListener('click', ()=>$('bgInput').click());
+  $('bgInput').addEventListener('change', async (e)=>{
+    const f=e.target.files && e.target.files[0]; if(!f) return;
+    const url = await readFile(f);
+    $('bgMedia').style.backgroundImage = `linear-gradient(rgba(0,0,0,.15),rgba(0,0,0,.15)), url("${url}")`;
+    $('bgMedia').style.backgroundSize = 'cover';
+    $('bgMedia').style.backgroundPosition = 'center';
+  });
+  $('goUpload').addEventListener('click', ()=>show('upload'));
+  $('generate').addEventListener('click', generate);
+  document.querySelectorAll('.fmt').forEach(b=>b.addEventListener('click', ()=>{ selected=b.dataset.fmt; updatePreview(); }));
+  $('dlPng').addEventListener('click', ()=>download('png')); $('dlJpg').addEventListener('click', ()=>download('jpeg'));
+  $('shareBtn').addEventListener('click', share);
+  $('restart').addEventListener('click', ()=>{ left=null; right=null; results=null; renderSlot('left'); renderSlot('right'); show('upload'); });
+
+  wireSlot('left'); wireSlot('right'); applyLang(); initMedia(); renderSlot('left'); renderSlot('right');
+})();
+</script>
+</body>
+</html>
